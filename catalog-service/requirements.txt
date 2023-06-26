@@ -1,0 +1,29 @@
+Functional Requirements:
+
+1. user can
+    1. fetch the catalog
+
+    queries:
+        1. get me all the items with name - GET /items?name="item-name"
+        2. get me all the items of a particular shop - GET /items?shop="shop-name"
+        3. get me all items belonging to a particular category - GET /items?category="item-category"
+
+2. shop owner/admin  can
+    1. Register his shop
+        1. create shop - POST/shop
+        2. delete his shop - PUT/shop
+    2. On his shop admin can
+        1. add a new category
+        2. add new brand
+        3. add new item under a brand and multiple category
+        4. delete item
+        5. update existing product
+        6. list all his product on website
+
+Non Functional Requirements:
+
+1. Data won't be huge - Lets start with 100 items
+2. Scale for queries so that if users grow the reads should not slow down
+
+Algebra:
+    1.

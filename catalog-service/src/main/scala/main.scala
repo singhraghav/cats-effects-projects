@@ -1,6 +1,4 @@
-package com.singhraghav.catalog.service
+object main extends App {
 
-@main
-def main(): Unit = {
   println("This is going to be a catalog service !!!!")
 }
