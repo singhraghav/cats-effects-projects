@@ -1,7 +1,15 @@
 package domain
 
+import domain.brand.Brand
+import domain.category.Category
+
+import java.util.UUID
+
 object item {
-  case class Item(name: String, brand: String, categories: List[String])
+
+  case class Item(id: UUID, name: String, brand: Brand, quantity: Int, categories: List[Category])
+
+  case class CreateItem(name: String, brandId: String, quantity: Int, category: List[String])
 
   case class UpdateItemName(id: String, newName: String)
 
