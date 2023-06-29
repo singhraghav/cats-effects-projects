@@ -9,7 +9,10 @@ lazy val allSourceDependencies = List(
   Libraries.cats,
   Libraries.catsEffect,
   Libraries.circeCore,
-  Libraries.circeParser
+  Libraries.circeParser,
+  Libraries.http4sDsl,
+  Libraries.http4sCirce,
+  Libraries.http4sServer
 )
 
 lazy val root = (project in file("."))

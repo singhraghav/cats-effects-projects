@@ -1,12 +1,18 @@
 package domain
 
+import cats.effect.IO
 import domain.user.UserType.{Admin, SimpleUser}
+import org.http4s.EntityDecoder
 
 import java.util.UUID
 
 object user {
 
   case class User(id: UUID, firstName: String, lastName: String, userType: UserType, email: String)
+
+  object User {
+    implicit val userDecoder: EntityDecoder[IO, User] = ???
+  }
 
   case class CreateUser(firstName: String, lastName: String, userType: String, email: String) {
     def toUser(id: UUID): User = User(id, firstName, lastName, UserType.fromString(userType), email)
