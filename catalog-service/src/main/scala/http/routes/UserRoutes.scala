@@ -17,14 +17,15 @@ final case class UserRoutes(logger: Logger[IO]) extends Http4sDsl[IO] {
 
   private val httpRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root / "users" =>
-      req.as[CreateUser].flatMap { body =>
-        println(s"Received request with body $body")
-        Ok("created user")
-      }
+      for {
+        userToCreate <- req.as[CreateUser]
+        _            <- logger.info(s"Received request to create a new user with parameters $userToCreate")
+        response     <- Ok("created user")
+      } yield response
 
     case req @ GET -> Root / "users" =>
       logger.info("new request received") *>
-      Ok("hello from server")
+        Ok("hello from server")
   }
 
   val routes: HttpRoutes[IO] = Router(

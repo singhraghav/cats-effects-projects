@@ -8,6 +8,7 @@ object Dependencies {
     val circe      = "0.14.4"
     val http4s     = "1.0.0-M39"
     val log4cats   = "2.3.1"
+    val logback    = "1.2.11"
   }
   object Libraries {
     def circe(artifact: String) = "io.circe" %% s"circe-$artifact" % V.circe
@@ -27,8 +28,8 @@ object Dependencies {
     val http4sClient = http4s("ember-client")
     val http4sCirce  = http4s("circe")
 
-    val log4cats = "org.typelevel" %% "log4cats-slf4j" % V.log4cats
-
+    val log4cats = "org.typelevel" %% "log4cats-slf4j"  % V.log4cats
+    val logback  = "ch.qos.logback" % "logback-classic" % V.logback
   }
 
   object CompilerPlugins {
