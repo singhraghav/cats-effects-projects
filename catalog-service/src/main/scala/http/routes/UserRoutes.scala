@@ -17,7 +17,7 @@ final case class UserRoutes(logger: Logger[IO]) extends Http4sDsl[IO] {
 
   private val httpRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root / "users" =>
-      req.as[String].flatMap { body =>
+      req.as[CreateUser].flatMap { body =>
         println(s"Received request with body $body")
         Ok("created user")
       }

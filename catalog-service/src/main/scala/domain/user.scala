@@ -2,7 +2,10 @@ package domain
 
 import cats.effect.IO
 import domain.user.UserType.{Admin, SimpleUser}
+import io.circe.Decoder
 import org.http4s.EntityDecoder
+import org.http4s.circe.jsonOf
+import io.circe.generic.semiauto._
 
 import java.util.UUID
 
@@ -10,12 +13,13 @@ object user {
 
   case class User(id: UUID, firstName: String, lastName: String, userType: UserType, email: String)
 
-  object User {
-    implicit val userDecoder: EntityDecoder[IO, User] = ???
-  }
-
   case class CreateUser(firstName: String, lastName: String, userType: String, email: String) {
     def toUser(id: UUID): User = User(id, firstName, lastName, UserType.fromString(userType), email)
+  }
+
+  object CreateUser {
+    implicit val createUserDecoder: Decoder[CreateUser] = deriveDecoder[CreateUser]
+    implicit val createUserEntityDecoder: EntityDecoder[IO, CreateUser] = jsonOf[IO, CreateUser]
   }
 
   sealed trait UserType {

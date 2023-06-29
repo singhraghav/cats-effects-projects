@@ -1,5 +1,4 @@
 import sbt.*
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
 object Dependencies {
 
   object V {
@@ -21,6 +20,7 @@ object Dependencies {
     val circeCore    = circe("core")
     val circeParser  = circe("parser")
     val circeRefined = circe("refined")
+    val circeGeneric = circe("generic")
 
     val http4sDsl    = http4s("dsl")
     val http4sServer = http4s("ember-server")

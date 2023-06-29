@@ -10,6 +10,7 @@ lazy val allSourceDependencies = List(
   Libraries.catsEffect,
   Libraries.circeCore,
   Libraries.circeParser,
+  Libraries.circeGeneric,
   Libraries.http4sDsl,
   Libraries.http4sCirce,
   Libraries.http4sServer
