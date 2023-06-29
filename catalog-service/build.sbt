@@ -2,20 +2,23 @@ import Dependencies.*
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "3.2.2"
+ThisBuild / scalaVersion := "2.13.10"
 
 lazy val allSourceDependencies = List(
   CompilerPlugins.zerowaste,
   Libraries.cats,
   Libraries.catsEffect,
   Libraries.circeCore,
-  Libraries.circeParser
+  Libraries.circeParser,
+  Libraries.circeGeneric,
+  Libraries.http4sDsl,
+  Libraries.http4sCirce,
+  Libraries.http4sServer
 )
 
 lazy val root = (project in file("."))
   .settings(
     name                := "catalog-service",
-    idePackagePrefix    := Some("com.singhraghav.catalog.service"),
     logo                := "Catalog-Service",
     libraryDependencies := allSourceDependencies
   )
