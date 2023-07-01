@@ -2,7 +2,7 @@ package domain
 
 import cats.effect.IO
 import domain.user.UserType.{Admin, SimpleUser}
-import io.circe.Decoder
+import io.circe.{Decoder, Encoder}
 import org.http4s.EntityDecoder
 import org.http4s.circe.jsonOf
 import io.circe.generic.semiauto._
@@ -19,7 +19,7 @@ object user {
 
   object CreateUser {
     implicit val createUserDecoder: Decoder[CreateUser] = deriveDecoder[CreateUser]
-    implicit val createUserEntityDecoder: EntityDecoder[IO, CreateUser] = jsonOf[IO, CreateUser]
+    implicit val createUserEncoder: Encoder[CreateUser] = deriveEncoder[CreateUser]
   }
 
   sealed trait UserType {
