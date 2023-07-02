@@ -12,7 +12,6 @@ object main extends IOApp.Simple {
   private val server: Resource[IO, Server] = {
     EmberServerBuilder
       .default[IO]
-      .withHost(ipv4"0.0.0.0")
       .withPort(port"8080")
       .withHttpApp(HttpApi.make.httpApp)
       .build

@@ -15,7 +15,10 @@ lazy val allSourceDependencies = List(
   Libraries.http4sCirce,
   Libraries.http4sServer,
   Libraries.log4cats,
-  Libraries.logback % Runtime
+  Libraries.logback % Runtime,
+  Libraries.doobieCore,
+  Libraries.doobiePostgres,
+  Libraries.doobieHikari
 )
 
 lazy val root = (project in file("."))
