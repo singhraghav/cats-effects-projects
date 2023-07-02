@@ -22,7 +22,7 @@ trait Categories[F[_]] {
 
 object Categories {
 
-  def make(implicit postgres: Resource[IO, HikariTransactor[IO]]): Categories[IO] =
+  def make(implicit postgres: HikariTransactor[IO]): Categories[IO] =
     new Categories[IO] {
       import CategoriesSQL._
       override def create(name: String): IO[UUID] = insertCategory(name).execute[IO]

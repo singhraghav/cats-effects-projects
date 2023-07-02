@@ -1,24 +1,31 @@
 package modules
 
 import cats.effect.IO
-import http.routes.UserRoutes
+import http.routes.{BrandRoutes, UserRoutes}
 import org.http4s.{HttpApp, HttpRoutes}
-import org.http4s.server.middleware.{AutoSlash, RequestLogger, ResponseLogger}
+import org.http4s.server.middleware.{AutoSlash, RequestLogger, ResponseLogger, Timeout}
 import org.typelevel.log4cats.Logger
+import cats.syntax.all._
+import org.http4s.implicits._
 
+import scala.concurrent.duration.DurationInt
 object HttpApi {
 
-  def make(implicit logger: Logger[IO]): HttpApi =
+  def make(implicit logger: Logger[IO], services: Services[IO]): HttpApi =
     new HttpApi {}
 }
 
-sealed abstract class HttpApi(implicit logger: Logger[IO]) {
+sealed abstract class HttpApi(implicit logger: Logger[IO], services: Services[IO]) {
 
   private val userRoutes: HttpRoutes[IO] = UserRoutes(logger).routes
+
+  private val brandRoutes: HttpRoutes[IO] = BrandRoutes(services.brands, logger).routes
 
   private val middleware: HttpRoutes[IO] => HttpRoutes[IO] = {
     { http: HttpRoutes[IO] =>
       AutoSlash(http)
+    } andThen { http: HttpRoutes[IO] =>
+      Timeout(10.seconds)(http)
     }
   }
 
@@ -30,5 +37,7 @@ sealed abstract class HttpApi(implicit logger: Logger[IO]) {
     }
   }
 
-  val httpApp: HttpApp[IO] = loggers(middleware(userRoutes).orNotFound)
+  private val allRoutes = userRoutes <+> brandRoutes
+
+  val httpApp: HttpApp[IO] = loggers(middleware(allRoutes).orNotFound)
 }

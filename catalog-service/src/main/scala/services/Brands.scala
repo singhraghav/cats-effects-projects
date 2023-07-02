@@ -14,21 +14,26 @@ trait Brands[F[_]] {
 
   def create(name: String): F[UUID]
 
-  def exists(name: String): F[Option[UUID]]
+  def findByName(name: String): F[List[Brand]]
+
+  def findById(id: UUID): F[List[Brand]]
 
   def findAll: F[List[Brand]]
 }
 
 object Brands {
 
-  def make(implicit postgres: Resource[IO, HikariTransactor[IO]]): Brands[IO] =
+  def make(implicit postgres: HikariTransactor[IO]): Brands[IO] =
     new Brands[IO] {
       import BrandSQL._
-      override def create(name: String): IO[UUID] = insertBrand(name).execute[IO]
+
+      override def create(name: String): IO[UUID] = insertBrand(name.toLowerCase).execute[IO]
 
       override def findAll: IO[List[Brand]] = selectAllBrands.execute[IO]
 
-      override def exists(name: String): IO[Option[UUID]] = checkIfExists(name).execute[IO]
+      override def findByName(name: String): IO[List[Brand]] = getByName(name).execute[IO]
+
+      override def findById(id: UUID): IO[List[Brand]] = getById(id).execute[IO]
     }
 }
 
@@ -53,7 +58,10 @@ private object BrandSQL {
   val selectAllBrands: doobie.ConnectionIO[List[Brand]] =
     sql"SELECT * FROM brands".query[Brand].stream.compile.toList
 
-  def checkIfExists(name: String): doobie.ConnectionIO[Option[UUID]] =
-    sql"SELECT id FROM brands WHERE LOWER(name) = LOWER($name)".query[UUID].option
+  def getByName(name: String): doobie.ConnectionIO[List[Brand]] =
+    sql"SELECT * FROM brands WHERE LOWER(name) = LOWER($name)".query[Brand].accumulate[List]
+
+  def getById(id: UUID): doobie.ConnectionIO[List[Brand]] =
+    sql"SELECT * FROM brands WHERE id = $id".query[Brand].accumulate[List]
 
 }

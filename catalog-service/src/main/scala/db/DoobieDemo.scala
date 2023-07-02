@@ -54,6 +54,6 @@ object DoobieDemo extends IOApp.Simple {
   override def run: IO[Unit] =
     for {
       appConf <- ApplicationConfig.load.myDebug
-      _       <- Categories.make(appConf.db.toHikariTransactorResource).create("Shirt").myDebug
+//      _       <- Brands.make(appConf.db.toHikariTransactorResource).findById(UUID.fromString("6c0f0fa7-d1dd-4e7b-81b5-3e6d1faa0886")).myDebug
     } yield ()
 }
