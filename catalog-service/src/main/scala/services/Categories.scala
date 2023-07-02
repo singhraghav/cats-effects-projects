@@ -25,7 +25,7 @@ object Categories {
   def make(implicit postgres: Resource[IO, HikariTransactor[IO]]): Categories[IO] =
     new Categories[IO] {
       import CategoriesSQL._
-      override def create(name: String): IO[UUID] = insertBrand(name).execute[IO]
+      override def create(name: String): IO[UUID] = insertCategory(name).execute[IO]
 
       override def findAll: IO[List[Category]] = selectAllBrands.execute[IO]
 
@@ -35,8 +35,14 @@ object Categories {
 
 private object CategoriesSQL {
 
-  def insertBrand(name: String): doobie.ConnectionIO[UUID] =
-    sql"INSERT INTO categories (id, name) VALUES (${UUID.randomUUID()}, $name)"
+  def insertCategory(name: String): doobie.ConnectionIO[UUID] =
+    sql"""
+        INSERT INTO categories (id, name)
+        VALUES (${UUID.randomUUID()}, $name)
+        ON CONFLICT (name)
+        DO UPDATE SET name = EXCLUDED.name
+        RETURNING id
+       """
       .update.withUniqueGeneratedKeys[UUID]("id")
 
   val selectAllBrands: doobie.ConnectionIO[List[Category]] =

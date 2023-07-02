@@ -1,13 +1,13 @@
 package db
 
-import cats.effect.{ IO, IOApp }
+import cats.effect.{IO, IOApp}
 import domain.brand.Brand
 import domain.conf.ApplicationConfig
 import doobie.util.transactor.Transactor
 import doobie.implicits._
 import doobie.postgres.implicits._
 import doobie.util.update.Update
-import services.Brands
+import services.{Brands, Categories}
 
 import java.util.UUID
 
@@ -54,6 +54,6 @@ object DoobieDemo extends IOApp.Simple {
   override def run: IO[Unit] =
     for {
       appConf <- ApplicationConfig.load.myDebug
-      _       <- Brands.make(appConf.db.toHikariTransactorResource).exists("lEviS").myDebug
+      _       <- Categories.make(appConf.db.toHikariTransactorResource).create("Shirt").myDebug
     } yield ()
 }
