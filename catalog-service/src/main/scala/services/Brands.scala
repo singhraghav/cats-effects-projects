@@ -36,13 +36,18 @@ private object BrandSQL {
 
   def insertBrand(name: String): doobie.ConnectionIO[UUID] = {
     sql"""
-        INSERT INTO brands (id, name)
-        VALUES (${UUID.randomUUID()}, $name)
-        ON CONFLICT (name)
-        DO UPDATE SET name = EXCLUDED.name
-        RETURNING id
+        WITH e AS(
+          INSERT INTO brands (id, name)
+          VALUES (${UUID.randomUUID()}, $name)
+          ON CONFLICT(name) DO NOTHING
+          RETURNING id
+        )
+        SELECT id FROM e
+        UNION
+        SELECT id FROM brands WHERE name=$name
        """
-      .update.withUniqueGeneratedKeys[UUID]("id")
+      .query[UUID]
+      .unique
   }
 
   val selectAllBrands: doobie.ConnectionIO[List[Brand]] =

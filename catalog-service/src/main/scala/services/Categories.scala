@@ -37,13 +37,18 @@ private object CategoriesSQL {
 
   def insertCategory(name: String): doobie.ConnectionIO[UUID] =
     sql"""
-        INSERT INTO categories (id, name)
-        VALUES (${UUID.randomUUID()}, $name)
-        ON CONFLICT (name)
-        DO UPDATE SET name = EXCLUDED.name
-        RETURNING id
-       """
-      .update.withUniqueGeneratedKeys[UUID]("id")
+       WITH e AS(
+         INSERT INTO categories (id, name)
+         VALUES (${UUID.randomUUID()}, $name)
+         ON CONFLICT(name) DO NOTHING
+         RETURNING id
+       )
+       SELECT id FROM e
+       UNION
+       SELECT id FROM brands WHERE name=$name
+      """
+      .query[UUID]
+      .unique
 
   val selectAllBrands: doobie.ConnectionIO[List[Category]] =
     sql"SELECT * FROM categories".query[Category].stream.compile.toList
