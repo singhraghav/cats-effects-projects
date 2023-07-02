@@ -6,6 +6,7 @@ import domain.brand.Brand
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.postgres.implicits._
+import utils.doobieUtils._
 
 import java.util.UUID
 
@@ -20,20 +21,14 @@ trait Brands[F[_]] {
 
 object Brands {
 
-  def make(postgres: Resource[IO, HikariTransactor[IO]]): Brands[IO] =
+  def make(implicit postgres: Resource[IO, HikariTransactor[IO]]): Brands[IO] =
     new Brands[IO] {
       import BrandSQL._
-      override def create(name: String): IO[UUID] = postgres.use { transactor =>
-        insertBrand(name).transact(transactor)
-      }
+      override def create(name: String): IO[UUID] = insertBrand(name).execute[IO]
 
-      override def findAll: IO[List[Brand]] = postgres.use { transactor =>
-        selectAllBrands.transact(transactor)
-      }
+      override def findAll: IO[List[Brand]] = selectAllBrands.execute[IO]
 
-      override def exists(name: String): IO[Option[UUID]] = postgres.use { transactor =>
-        checkIfExists(name).transact(transactor)
-      }
+      override def exists(name: String): IO[Option[UUID]] = checkIfExists(name).execute[IO]
     }
 }
 
@@ -48,4 +43,5 @@ private object BrandSQL {
 
   def checkIfExists(name: String): doobie.ConnectionIO[Option[UUID]] =
     sql"SELECT id FROM brands WHERE LOWER(name) = LOWER($name)".query[UUID].option
+
 }
