@@ -10,6 +10,7 @@ object Dependencies {
     val log4cats   = "2.3.1"
     val logback    = "1.2.11"
     val doobie     = "1.0.0-RC1"
+    val pureConfig = "0.17.4"
   }
   object Libraries {
     def circe(artifact: String) = "io.circe" %% s"circe-$artifact" % V.circe
@@ -17,6 +18,8 @@ object Dependencies {
     def http4s(artifact: String): ModuleID = "org.http4s" %% s"http4s-$artifact" % V.http4s
 
     def doobie(artifact: String) = "org.tpolecat" %% s"doobie-$artifact" % V.doobie
+
+    def pureConfig(artifact: String) = "com.github.pureconfig" %% s"$artifact" % V.pureConfig
 
     val cats       = "org.typelevel" %% "cats-core"   % V.cats
     val catsEffect = "org.typelevel" %% "cats-effect" % V.catsEffect
@@ -37,6 +40,9 @@ object Dependencies {
     val doobieCore     = doobie("core")
     val doobiePostgres = doobie("postgres")
     val doobieHikari   = doobie("hikari")
+
+    val purConfigCore        = pureConfig("pureconfig")
+    val pureConfigCatsEffect = pureConfig("pureconfig-cats-effect")
   }
 
   object CompilerPlugins {

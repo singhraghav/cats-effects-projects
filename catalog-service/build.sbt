@@ -18,7 +18,9 @@ lazy val allSourceDependencies = List(
   Libraries.logback % Runtime,
   Libraries.doobieCore,
   Libraries.doobiePostgres,
-  Libraries.doobieHikari
+  Libraries.doobieHikari,
+  Libraries.purConfigCore,
+  Libraries.pureConfigCatsEffect
 )
 
 lazy val root = (project in file("."))
