@@ -9,7 +9,8 @@ import domain.user.CreateUser
 import domain.jsonc._
 import org.typelevel.log4cats.Logger
 import services.Users
-import org.http4s.{ HttpRoutes, Response, Status }
+import org.http4s.{ HttpRoutes, InvalidMessageBodyFailure, Response }
+import org.postgresql.util.PSQLException
 
 import java.util.UUID
 
@@ -23,28 +24,29 @@ final case class UserRoutes(users: Users[IO], logger: Logger[IO]) extends Http4s
 
   private val httpRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root / "create" =>
-      for {
-        userToCreate      <- req.as[CreateUser]
-        _                 <- logger.info(s"Received request to create a new user with parameters $userToCreate")
-        dbInsertionResult <- users.create(userToCreate).attempt
-        response          <- handleCreationResult(dbInsertionResult)
-      } yield response
+      (
+        for {
+          userToCreate <- req.as[CreateUser]
+          _            <- logger.info(s"Received request to create a new user with parameters $userToCreate")
+          userId       <- users.create(userToCreate)
+          response     <- Ok(ResourceCreated(userId))
+        } yield response
+      ).handleErrorWith(handleUserCreationErrors)
 
-    case GET -> Root / "get" :? UserEmailQueryParam(email) =>
-      Ok(users.findByEmail(email.trim))
+    case GET -> Root / "get" :? UserEmailQueryParam(email) => Ok(users.findByEmail(email.trim))
 
-    case GET -> Root / "get" :? UserIdQueryParam(id) =>
-      Ok(users.findById(id))
+    case GET -> Root / "get" :? UserIdQueryParam(id) => Ok(users.findById(id))
   }
 
-  private def handleCreationResult(dbInsertionResult: Either[Throwable, UUID]): IO[Response[IO]] = {
+  private val handleUserCreationErrors: PartialFunction[Throwable, IO[Response[IO]]] = {
     val duplicateInsertionError = "ERROR: duplicate key value violates unique constraint \"users_email_key\""
-    dbInsertionResult match {
-      case Right(generatedUserId) => Ok(ResourceCreated(generatedUserId))
-      case Left(error) if error.getMessage.contains(duplicateInsertionError) =>
+
+    val response: PartialFunction[Throwable, IO[Response[IO]]] = {
+      case ex: InvalidMessageBodyFailure => BadRequest(ex.getCause().getMessage)
+      case ex: PSQLException if ex.getMessage.contains(duplicateInsertionError) =>
         BadRequest("user with this email already exist")
-      case _ => InternalServerError()
     }
+    response
   }
 
   val routes: HttpRoutes[IO] = Router(
