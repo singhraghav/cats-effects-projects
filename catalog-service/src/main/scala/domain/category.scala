@@ -1,18 +1,14 @@
 package domain
 
-import io.circe.{ Decoder, Encoder }
-import io.circe.generic.semiauto.{ deriveDecoder, deriveEncoder }
-
+import io.circe.generic.JsonCodec
 import java.util.UUID
 
 object category {
+
+  @JsonCodec
   case class Category(id: UUID, name: String)
 
+  @JsonCodec
   case class CreateCategory(name: String)
-
-  object CreateCategory {
-    implicit val decoder: Decoder[CreateCategory] = deriveDecoder[CreateCategory]
-    implicit val encoder: Encoder[CreateCategory] = deriveEncoder[CreateCategory]
-  }
 
 }

@@ -1,22 +1,26 @@
 package domain
 
-import domain.brand.Brand
-import domain.category.Category
+import io.circe.generic.JsonCodec
 
 import java.util.UUID
 
 object item {
 
-  case class Item(id: UUID, name: String, brand: Brand, quantity: Int, categories: List[Category])
+  @JsonCodec
+  case class ItemMetaData(id: UUID, name: String, brandId: UUID, quantity: Int, shopId: UUID, categories: List[UUID])
 
-  case class CreateItemParam(name: String, brandId: String, quantity: Int, category: List[String])
+  case class CreateItem(name: String, brandId: UUID, quantity: Int, shopId: UUID, categories: List[UUID]) {
 
-  case class UpdateItemNameParam(id: String, newName: String)
+    def toItemMetaData: ItemMetaData = ItemMetaData(UUID.randomUUID(), name.toLowerCase(), brandId, quantity, shopId, categories)
 
-  case class UpdateItemBrandParam(id: String, newBrand: String)
+  }
 
-  case class UpdateItemCategoryParam(id: String, category: List[String])
+  case class UpdateItemNameParam(id: UUID, newName: String)
 
-  case class UpdateItemQuantityParam(id: String, newQuantity: Int)
+  case class UpdateItemBrandParam(id: UUID, newBrand: UUID)
+
+  case class UpdateItemCategoryParam(id: UUID, newCategories: List[String])
+
+  case class UpdateItemQuantityParam(id: UUID, newQuantity: Int)
 
 }

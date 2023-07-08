@@ -23,6 +23,9 @@ lazy val allSourceDependencies = List(
   Libraries.pureConfigCatsEffect
 )
 
+// This helps in Automatically deriving encoder and decoder for circe
+scalacOptions += "-Ymacro-annotations"
+
 lazy val root = (project in file("."))
   .settings(
     name                := "catalog-service",

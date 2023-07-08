@@ -1,28 +1,20 @@
 package domain
 
-import domain.user.UserType.{ Admin, SimpleUser }
-import io.circe.{ Decoder, Encoder, Json }
-import io.circe.generic.semiauto._
+import domain.user.UserType.{Admin, SimpleUser}
+import io.circe.{Decoder, Encoder, Json}
 import doobie.Meta
 import doobie.postgres.implicits._
+import io.circe.generic.JsonCodec
 
 import java.util.UUID
 
 object user {
 
+  @JsonCodec
   case class User(id: UUID, firstName: String, lastName: String, userType: UserType, email: String)
 
-  object User {
-    implicit val decoder: Decoder[User] = deriveDecoder[User]
-    implicit val encoder: Encoder[User] = deriveEncoder[User]
-  }
-
+  @JsonCodec
   case class CreateUser(firstName: String, lastName: String, userType: UserType, email: String)
-
-  object CreateUser {
-    implicit val createUserDecoder: Decoder[CreateUser] = deriveDecoder[CreateUser]
-    implicit val createUserEncoder: Encoder[CreateUser] = deriveEncoder[CreateUser]
-  }
 
   sealed trait UserType {
     def isAdmin: Boolean = this.isInstanceOf[Admin.type]

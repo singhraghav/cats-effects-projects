@@ -8,6 +8,7 @@ import doobie.postgres.implicits._
 import utils.doobieUtils._
 
 import java.util.UUID
+
 trait Users[F[_]] {
 
   def create(userDetails: CreateUser): F[UUID]
