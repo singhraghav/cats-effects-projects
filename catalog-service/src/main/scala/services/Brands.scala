@@ -1,7 +1,6 @@
 package services
 
 import cats.effect.IO
-import cats.effect.kernel.Resource
 import domain.brand.Brand
 import doobie.hikari.HikariTransactor
 import doobie.implicits._

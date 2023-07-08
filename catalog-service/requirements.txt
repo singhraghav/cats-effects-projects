@@ -24,3 +24,8 @@ Non Functional Requirements:
 
 1. Data won't be huge - Lets start with 100 items
 2. Scale for queries so that if users grow the reads should not slow down
+
+
+USER Table:
+
+

@@ -1,29 +1,50 @@
 package http.routes
 
 import cats.effect.IO
-import org.http4s._
+import domain.ResourceCreated
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.Router
 import domain.user.CreateUser
 import domain.jsonc._
 import org.typelevel.log4cats.Logger
+import services.Users
+import org.http4s.{ HttpRoutes, Response, Status }
 
-final case class UserRoutes(logger: Logger[IO]) extends Http4sDsl[IO] {
+import java.util.UUID
 
-  private[routes] val prefixPath = "/auth"
+final case class UserRoutes(users: Users[IO], logger: Logger[IO]) extends Http4sDsl[IO] {
+
+  private[routes] val prefixPath = "/users"
+
+  private object UserEmailQueryParam extends QueryParamDecoderMatcher[String]("email")
+
+  private object UserIdQueryParam extends QueryParamDecoderMatcher[UUID]("id")
 
   private val httpRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case req @ POST -> Root / "users" =>
+    case req @ POST -> Root / "create" =>
       for {
-        userToCreate <- req.as[CreateUser]
-        _            <- logger.info(s"Received request to create a new user with parameters $userToCreate")
-        response     <- Ok(userToCreate)
+        userToCreate      <- req.as[CreateUser]
+        _                 <- logger.info(s"Received request to create a new user with parameters $userToCreate")
+        dbInsertionResult <- users.create(userToCreate).attempt
+        response          <- handleCreationResult(dbInsertionResult)
       } yield response
 
-    case req @ GET -> Root / "users" =>
-      logger.info("new request received") *>
-        Ok("hello from server")
+    case GET -> Root / "get" :? UserEmailQueryParam(email) =>
+      Ok(users.findByEmail(email.trim))
+
+    case GET -> Root / "get" :? UserIdQueryParam(id) =>
+      Ok(users.findById(id))
+  }
+
+  private def handleCreationResult(dbInsertionResult: Either[Throwable, UUID]): IO[Response[IO]] = {
+    val duplicateInsertionError = "ERROR: duplicate key value violates unique constraint \"users_email_key\""
+    dbInsertionResult match {
+      case Right(generatedUserId) => Ok(ResourceCreated(generatedUserId))
+      case Left(error) if error.getMessage.contains(duplicateInsertionError) =>
+        BadRequest("user with this email already exist")
+      case _ => InternalServerError()
+    }
   }
 
   val routes: HttpRoutes[IO] = Router(

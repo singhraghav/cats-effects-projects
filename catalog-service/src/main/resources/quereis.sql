@@ -11,9 +11,11 @@ Entities:
     id UUID PRIMARY KEY,
     first_name text NOT NULL,
     last_name text NOT NULL,
-    type user_type NOT NULL,
+    user_type user_type NOT NULL,
     email text UNIQUE NOT NULL
     );
+    #Create hash index on email for efficient searching
+    CREATE INDEX email_hash_index ON users USING HASH (email);
  2. categories
     CREATE TABLE categories(
     id UUID PRIMARY KEY,

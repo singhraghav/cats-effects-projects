@@ -1,11 +1,10 @@
 package domain
 
-import cats.effect.IO
-import domain.user.UserType.{Admin, SimpleUser}
-import io.circe.{Decoder, Encoder}
-import org.http4s.EntityDecoder
-import org.http4s.circe.jsonOf
+import domain.user.UserType.{ Admin, SimpleUser }
+import io.circe.{ Decoder, Encoder, Json }
 import io.circe.generic.semiauto._
+import doobie.Meta
+import doobie.postgres.implicits._
 
 import java.util.UUID
 
@@ -13,9 +12,12 @@ object user {
 
   case class User(id: UUID, firstName: String, lastName: String, userType: UserType, email: String)
 
-  case class CreateUser(firstName: String, lastName: String, userType: String, email: String) {
-    def toUser(id: UUID): User = User(id, firstName, lastName, UserType.fromString(userType), email)
+  object User {
+    implicit val decoder: Decoder[User] = deriveDecoder[User]
+    implicit val encoder: Encoder[User] = deriveEncoder[User]
   }
+
+  case class CreateUser(firstName: String, lastName: String, userType: UserType, email: String)
 
   object CreateUser {
     implicit val createUserDecoder: Decoder[CreateUser] = deriveDecoder[CreateUser]
@@ -31,8 +33,12 @@ object user {
 
   object UserType {
 
+    implicit val encoder: Encoder[UserType]   = Encoder.instance(userType => Json.fromString(userType.toString))
+    implicit val decoder: Decoder[UserType]   = Decoder[String].map(fromString)
+    implicit val userTypeMeta: Meta[UserType] = pgEnumString("user_type", UserType.fromString, _.toString)
+
     def fromString(str: String): UserType = str.toLowerCase() match {
-      case "admin" => Admin
+      case "admin"       => Admin
       case "simple_user" => SimpleUser
     }
 
@@ -47,5 +53,3 @@ object user {
   }
 
 }
-
-
