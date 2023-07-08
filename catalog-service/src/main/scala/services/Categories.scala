@@ -1,7 +1,6 @@
 package services
 
 import cats.effect.IO
-import cats.effect.kernel.Resource
 import domain.category.Category
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
@@ -14,7 +13,9 @@ trait Categories[F[_]] {
 
   def create(name: String): F[UUID]
 
-  def exists(name: String): F[Option[UUID]]
+  def findByName(name: String): F[List[Category]]
+
+  def findById(id: UUID): F[List[Category]]
 
   def findAll: F[List[Category]]
 
@@ -27,9 +28,11 @@ object Categories {
       import CategoriesSQL._
       override def create(name: String): IO[UUID] = insertCategory(name).execute[IO]
 
-      override def findAll: IO[List[Category]] = selectAllBrands.execute[IO]
+      override def findByName(name: String): IO[List[Category]] = getByName(name).execute[IO]
 
-      override def exists(name: String): IO[Option[UUID]] = checkIfExists(name).execute[IO]
+      override def findById(id: UUID): IO[List[Category]] = getById(id).execute[IO]
+
+      override def findAll: IO[List[Category]] = selectAllBrands.execute[IO]
     }
 }
 
@@ -53,7 +56,10 @@ private object CategoriesSQL {
   val selectAllBrands: doobie.ConnectionIO[List[Category]] =
     sql"SELECT * FROM categories".query[Category].stream.compile.toList
 
-  def checkIfExists(name: String): doobie.ConnectionIO[Option[UUID]] =
-    sql"SELECT id FROM categories WHERE LOWER(name) = LOWER($name)".query[UUID].option
+  def getByName(name: String): doobie.ConnectionIO[List[Category]] =
+    sql"SELECT * FROM categories WHERE LOWER(name) = LOWER($name)".query[Category].accumulate[List]
+
+  def getById(id: UUID): doobie.ConnectionIO[List[Category]] =
+    sql"SELECT * FROM categories WHERE id = $id".query[Category].accumulate[List]
 
 }
