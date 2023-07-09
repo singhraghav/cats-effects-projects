@@ -34,22 +34,23 @@ Entities:
      );
      CREATE INDEX name_hash_index ON shop_meta_data USING HASH (name);
  4. items
-    CREATE TABLE item_meta_data(
+    CREATE TABLE items(
     id UUID PRIMARY KEY,
     name text NOT NULL,
-    brand_id UUID REFERENCES brands (id) ON DELETE CASCADE,
+    brand_id UUID REFERENCES brands (id),
     quantity smallint NOT NULL,
     shop_id UUID REFERENCES shop_meta_data (id) ON DELETE CASCADE
     CONSTRAINT check_quantity_not_below_one CHECK (quantity >= 1)
     );
-    #ITEM AND SHOPS have MANY TO MANY RELATIONSHIP
-    CREATE TABLE items_shops(
-       item_id UUID REFERENCES item_meta_data (id) ON DELETE CASCADE,
-       shop_id UUID REFERENCES shop_meta_data (id) ON DELETE CASCADE
-    );
+    #Enforce that an item should have only one entry per brand in a shop
+    ALTER TABLE items ADD CONSTRAINT items_name_brand_id_shop UNIQUE (name, brand_id, shop_id);
+    #efficient searching on name and brand
+    CREATE INDEX name_brand_index ON items (name, brand_id);
+    #efficient searching for brands and shops
+    CREATE INDEX brand_shop_index ON items (brand_id, shop_id);
     #ITEM AND Category have MANY TO MANY RELATIONSHIP [EACH ITEM CAN BE TAGGED WITH 5 Categories]
-    CREATE TABLE item_category(
-       item_id UUID REFERENCES item_meta_data (id) ON DELETE CASCADE,
+    CREATE TABLE items_category(
+       item_id UUID REFERENCES items (id) ON DELETE CASCADE,
        category_id UUID REFERENCES categories (id) ON DELETE CASCADE
     );
 

@@ -1,26 +1,30 @@
 package domain
 
 import io.circe.generic.JsonCodec
-
 import java.util.UUID
 
 object item {
 
   @JsonCodec
-  case class ItemMetaData(id: UUID, name: String, brandId: UUID, quantity: Int, shopId: UUID, categories: List[UUID])
+  case class Item(id: UUID, name: String, brandId: UUID, quantity: Int, shopId: UUID)
 
-  case class CreateItem(name: String, brandId: UUID, quantity: Int, shopId: UUID, categories: List[UUID]) {
-
-    def toItemMetaData: ItemMetaData = ItemMetaData(UUID.randomUUID(), name.toLowerCase(), brandId, quantity, shopId, categories)
-
+  @JsonCodec
+  case class CreateItem(name: String, brandId: UUID, quantity: Int, shopId: UUID) {
+    def toItem: Item = Item(UUID.randomUUID(), name.toLowerCase(), brandId, quantity, shopId)
   }
 
-  case class UpdateItemNameParam(id: UUID, newName: String)
+  @JsonCodec
+  case class ItemSearchQueryParam(name: Option[String], brandId: Option[UUID], shopId: Option[UUID])
 
-  case class UpdateItemBrandParam(id: UUID, newBrand: UUID)
+  object ItemSearchQueryParam {
 
-  case class UpdateItemCategoryParam(id: UUID, newCategories: List[String])
+    def apply(params: Map[String, scala.collection.Seq[String]]): ItemSearchQueryParam = {
+      val name    = params.get("name").flatMap(_.headOption).map(_.toLowerCase())
+      val brandId = params.get("brandId").flatMap(_.headOption).map(id => UUID.fromString(id.trim))
+      val shopId  = params.get("shopId").flatMap(_.headOption).map(id => UUID.fromString(id.trim))
+      new ItemSearchQueryParam(name, brandId, shopId)
+    }
 
-  case class UpdateItemQuantityParam(id: UUID, newQuantity: Int)
+  }
 
 }
