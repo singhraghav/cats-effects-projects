@@ -25,12 +25,13 @@ object main extends IOApp.Simple {
     }
   }
 
-  override def run: IO[Unit] =
+  override def run: IO[Unit] = {
     ApplicationConfig.load.flatMap { conf =>
       logger.info(s"Application Conf loaded $conf") *>
         conf.db.toHikariTransactorResource.flatMap { hikari =>
           server(conf.server.port)(Services(hikari))
         }.use(_ => IO.never.as(ExitCode.Success))
     }
+  }
 
 }

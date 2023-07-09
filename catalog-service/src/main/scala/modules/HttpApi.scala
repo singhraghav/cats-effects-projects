@@ -1,9 +1,9 @@
 package modules
 
 import cats.effect.IO
-import http.routes.{ BrandRoutes, CategoryRoutes, UserRoutes }
-import org.http4s.{ HttpApp, HttpRoutes }
-import org.http4s.server.middleware.{ AutoSlash, RequestLogger, ResponseLogger, Timeout }
+import http.routes.{BrandRoutes, CategoryRoutes, ShopRoutes, UserRoutes}
+import org.http4s.{HttpApp, HttpRoutes}
+import org.http4s.server.middleware.{AutoSlash, RequestLogger, ResponseLogger, Timeout}
 import org.typelevel.log4cats.Logger
 import cats.syntax.all._
 import org.http4s.implicits._
@@ -23,6 +23,8 @@ sealed abstract class HttpApi(implicit logger: Logger[IO], services: Services[IO
 
   private val categoryRoutes: HttpRoutes[IO] = CategoryRoutes(services.categories, logger).routes
 
+  private val shopRoutes: HttpRoutes[IO] = ShopRoutes(services.shops, logger).routes
+
   private val middleware: HttpRoutes[IO] => HttpRoutes[IO] = {
     { http: HttpRoutes[IO] =>
       AutoSlash(http)
@@ -39,7 +41,7 @@ sealed abstract class HttpApi(implicit logger: Logger[IO], services: Services[IO
     }
   }
 
-  private val allRoutes = userRoutes <+> brandRoutes <+> categoryRoutes
+  private val allRoutes = userRoutes <+> brandRoutes <+> categoryRoutes <+> shopRoutes
 
   val httpApp: HttpApp[IO] = loggers(middleware(allRoutes).orNotFound)
 }
