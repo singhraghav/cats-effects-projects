@@ -24,8 +24,11 @@ final case class ItemRoutes(items: Items[IO], logger: Logger[IO]) extends Http4s
       } yield response
 
     case GET -> Root / "get" :? params =>
-      Ok(items.search(ItemSearchQueryParam(params)))
-
+      val queryParameter = ItemSearchQueryParam(params)
+      if (queryParameter.hasNoParameterDefined)
+        BadRequest("query parameters invalid !!!")
+      else
+        Ok(items.search(ItemSearchQueryParam(params)))
   }
 
   val routes: HttpRoutes[IO] = Router(

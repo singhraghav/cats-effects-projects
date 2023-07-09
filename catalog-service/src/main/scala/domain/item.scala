@@ -14,7 +14,9 @@ object item {
   }
 
   @JsonCodec
-  case class ItemSearchQueryParam(name: Option[String], brandId: Option[UUID], shopId: Option[UUID])
+  case class ItemSearchQueryParam(name: Option[String], brandId: Option[UUID], shopId: Option[UUID]) {
+    def hasNoParameterDefined: Boolean = name.isEmpty && brandId.isEmpty && shopId.isEmpty
+  }
 
   object ItemSearchQueryParam {
 
